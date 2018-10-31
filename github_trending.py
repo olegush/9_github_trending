@@ -1,23 +1,24 @@
 from datetime import datetime
 from datetime import timedelta
 import requests
-import json
 
 
 def get_trending_repositories():
     git_url = 'https://api.github.com/search/repositories'
-    time_week_ago = datetime.now() - timedelta(days=7)
-    day_week_ago = str(time_week_ago.strftime('%Y-%m-%d'))
-    repos_url = git_url + '?q=created:>' + day_week_ago + '&sort=stars'
-    repos_response = requests.get(repos_url)
-    return json.loads(repos_response.text)['items']
+    time_ago = datetime.now() - timedelta(days=7)
+    day_ago_str = 'created:>{}'.format(time_ago.strftime('%Y-%m-%d'))
+    repo_params = {'q': day_ago_str, 'sort': 'stars'}
+    repos_response = requests.get(git_url, params=repo_params)
+    return repos_response.json()['items']
 
 
 def get_open_issues(repo_owner, repo_name):
-    git_url = 'https://api.github.com/repos/'
-    issues_url = git_url + repo_owner + '/' + repo_name + '/issues?state=open'
-    issues_response = requests.get(issues_url)
-    return json.loads(issues_response.text)
+    git_url = 'https://api.github.com/repos/{}/{}/issues'.format(repo_owner,
+                                                                 repo_name
+                                                                 )
+    issues_params = {'state': 'open'}
+    issues_response = requests.get(git_url, params=issues_params)
+    return issues_response.json()
 
 
 if __name__ == '__main__':
